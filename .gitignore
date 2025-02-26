@@ -169,3 +169,11 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Datasets
+data/train/images/
+data/train/labels/
+data/test/images/
+data/test/labels/
+data/test.zip
+data/train.zip
