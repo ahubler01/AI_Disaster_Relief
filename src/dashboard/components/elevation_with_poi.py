@@ -5,6 +5,9 @@ from matplotlib.colors import LinearSegmentedColormap
 import geopandas as gpd
 import pandas as pd
 import os
+from matplotlib.legend_handler import HandlerPatch
+from matplotlib.patches import Patch
+from matplotlib.collections import PatchCollection
 
 def create_elevation_poi_map(disaster="Joplin Tornado"):
     # Get the current working directory
@@ -95,6 +98,65 @@ def create_elevation_poi_map(disaster="Joplin Tornado"):
     # Set the aspect ratio to equal to maintain proper geographic proportions
     ax.set_aspect('equal')
 
+    return fig
+
+class HandlerPatchCollection(HandlerPatch):
+    def create_artists(self, legend, orig_handle,
+                      xdescent, ydescent, width, height, fontsize, trans):
+        p = Patch(facecolor=orig_handle.get_facecolor()[0],
+                 edgecolor=orig_handle.get_edgecolor()[0],
+                 linewidth=orig_handle.get_linewidth()[0])
+        self.update_prop(p, orig_handle, legend)
+        p.set_transform(trans)
+        return [p]
+
+def plot_elevation_with_poi(elevation_data, poi_data, title="Elevation with Points of Interest"):
+    fig, ax = plt.subplots(figsize=(12, 8))
+    
+    # Plot elevation data
+    elevation_plot = ax.imshow(elevation_data, cmap='terrain')
+    
+    # Create patches for POIs
+    patches = []
+    colors = []
+    for _, poi in poi_data.iterrows():
+        # Create circle patch for each POI
+        circle = plt.Circle((poi['x'], poi['y']), radius=5, 
+                          facecolor=poi_colors[poi['type']],
+                          edgecolor='black')
+        patches.append(circle)
+        colors.append(poi_colors[poi['type']])
+    
+    # Create patch collection
+    p = PatchCollection(patches, alpha=0.7)
+    p.set_facecolor(colors)
+    p.set_edgecolor('black')
+    p.set_linewidth(1)
+    
+    # Add collection to plot
+    ax.add_collection(p)
+    
+    # Create legend patches
+    legend_patches = [
+        Patch(facecolor=poi_colors[poi_type], edgecolor='black', label=poi_type)
+        for poi_type in poi_types
+    ]
+    
+    # Add legend with custom handler
+    plt.legend(handles=legend_patches,
+              handler_map={PatchCollection: HandlerPatchCollection()},
+              title='Point of Interest Type',
+              title_fontsize=14)
+    
+    # Add colorbar for elevation
+    plt.colorbar(elevation_plot, label='Elevation (meters)')
+    
+    # Set plot properties
+    ax.set_title(title, fontsize=16)
+    ax.set_xlabel('X Coordinate', fontsize=14)
+    ax.set_ylabel('Y Coordinate', fontsize=14)
+    ax.grid(True, alpha=0.3)
+    
     return fig
 
 if __name__ == "__main__":
