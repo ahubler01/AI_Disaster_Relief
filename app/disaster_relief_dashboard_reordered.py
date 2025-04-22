@@ -15,7 +15,7 @@ def get_base64_of_image(image_path):
 
 st.set_page_config(
     page_title="Disaster Relief Dashboard",
-    page_icon="🌪️",
+    page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -50,7 +50,41 @@ st.markdown(f"""
         z-index: -1;
     }}
 
-        /* Sidebar with solid black background */
+    .main-title {{
+        color: #2c3e50;
+        text-align: center;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin: 10px auto 20px auto;
+        width: fit-content;
+        font-size: 32px;
+        font-weight: bold;
+    }}
+
+    /* Rounded corners for plots */
+    .element-container {{
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }}
+
+    .stPlotlyChart {{
+        border-radius: 10px;
+    }}
+
+    /* Plot containers specifically */
+    .element-container .stImage {{
+        border-radius: 10px;
+        overflow: hidden;
+    }}
+
+    .element-container .stPlotlyChart {{
+        border-radius: 10px;
+        overflow: hidden;
+    }}
+
+    /* Sidebar with solid black background */
     section[data-testid="stSidebar"] > div:first-child {{
         background-color: black;
         padding-top: 20px;
@@ -81,10 +115,12 @@ st.markdown(f"""
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }}
 
-    h2 {{
-        color: #34495e;
+    h2, h3 {{
+        color: white;
         border-bottom: 2px solid #3498db;
         padding-bottom: 10px;
+        margin-top: 20px;
+        font-size: 27px;
     }}
 
     .stContainer {{
@@ -144,6 +180,9 @@ st.markdown(f"""
     </style>
 """, unsafe_allow_html=True)
 
+# Add the main title
+st.markdown('<h1 class="main-title">🤖 A.I for Disaster Relief</h1>', unsafe_allow_html=True)
+
 # Custom-styled sidebar title
 st.sidebar.markdown('<div class="sidebar-title"><h2>Select Disaster Area</h2></div>', unsafe_allow_html=True)
 
@@ -153,180 +192,7 @@ selected_disaster = st.sidebar.radio(
     ["Joplin Tornado", "Sunda Tsunami"]
 )
 
-
-if selected_disaster == "Joplin Tornado":
-    # Joplin specific content
-    st.subheader("Tornado Damage Assessment")
-    st.markdown("""
-    Interactive map showing the distribution and severity of tornado damage across Joplin.
-    Color coding: 🟢 No damage | 🔵 Minor damage | 🟡 Major damage | 🔴 Destroyed
-    """)
-
-    # Read and display the Joplin HTML file
-    with open(r'C:\Users\yanit\OneDrive\Bureau\Data Insights And Visualization\joplin_tornado_map.html', 'r', encoding='utf-8') as f:
-        html_data = f.read()
-    components.html(html_data, height=600)
-
-else:
-    # Sunda specific content
-    st.subheader("Tsunami Damage Assessment")
-    st.markdown("""
-    Interactive map showing the distribution and severity of tsunami damage in the Sunda area.
-    Color coding: 🟢 No damage | 🔵 Minor damage | 🟡 Major damage | 🔴 Destroyed
-    """)
-
-    # Read and display the Sunda HTML file
-    with open(r'C:\Users\yanit\OneDrive\Bureau\Data Insights And Visualization\tsunami\sunda_tsunami_map.html', 'r', encoding='utf-8') as f:
-        html_data = f.read()
-    components.html(html_data, height=600)
-
-st.markdown("---")
-
-# Create three columns for the visualizations
-col1, col2, col3 = st.columns(3)
-
-if selected_disaster == "Joplin Tornado":
-    # Joplin visualizations
-    with col1:
-        st.subheader("Population Density")
-        st.markdown("Shows population distribution across Joplin, crucial for evacuation planning.")
-        fig1 = create_population_density_map()
-        fig1.set_size_inches(10, 10)
-        st.pyplot(fig1)
-
-    with col2:
-        st.subheader("Elevation & POIs")
-        st.markdown("Displays terrain elevation and important Points of Interest.")
-        fig2 = create_elevation_poi_map()
-        fig2.set_size_inches(10, 10)
-        st.pyplot(fig2)
-
-    with col3:
-        st.subheader("Emergency Response Times")
-        st.markdown("Visualizes estimated emergency response times across the city.")
-        fig3 = create_response_time_map()
-        fig3.set_size_inches(10, 10)
-        st.pyplot(fig3)
-
-    # Joplin Hospital Information
-    st.markdown("---")
-    st.markdown("""
-    <h2 style='color: white; padding-bottom: 10px;'>
-        🏥 Hospital Information
-    </h2>
-        """, unsafe_allow_html=True)
-
-    # Read Joplin hospital data
-    with open(r'C:\Users\yanit\OneDrive\Bureau\AI_Disaster_Relief\app\responsetime\hospitals_joplin.geojson', 'r') as f:
-        hospitals_data = json.load(f)
-
-    # Create columns for each hospital
-    cols = st.columns(len(hospitals_data['features']))
-
-    for idx, hospital in enumerate(hospitals_data['features']):
-        with cols[idx]:
-            name = hospital['properties'].get('name', 'N/A')
-            address = f"{hospital['properties'].get('addr:housenumber', 'N/A')} {hospital['properties'].get('addr:street', 'N/A')}"
-            city_zip = f"{hospital['properties'].get('addr:city', 'N/A')}, {hospital['properties'].get('addr:postcode', 'N/A')}"
-            phone = hospital['properties'].get('phone', 'N/A')
-            website = hospital['properties'].get('website', '#')
-            beds = hospital['properties'].get('beds', 'N/A')
-            
-            facilities = []
-            if hospital['properties'].get('helipad') == 'yes':
-                facilities.append("🚁 Helipad Available")
-            if hospital['properties'].get('emergency') == 'yes':
-                facilities.append("🏥 Emergency Services")
-            if beds != 'N/A':
-                facilities.append(f"🛏️ Beds: {beds}")
-
-            st.subheader(name)
-            st.markdown("**Address**")
-            st.text(address)
-            st.text(city_zip)
-            st.markdown("**Contact**")
-            st.text(f"📞 {phone}")
-            st.markdown("**Facilities**")
-            if facilities:
-                for facility in facilities:
-                    st.text(facility)
-            else:
-                st.text("No facility information available")
-            st.markdown("**Website**")
-            st.markdown(f"[Visit Website]({website})")
-
-
-else:
-    # Sunda visualizations
-    with col1:
-        st.subheader("Population Density")
-        st.markdown("Shows population distribution in the Sunda area, crucial for evacuation planning.")
-        fig1 = create_sunda_population_density_map()
-        fig1.set_size_inches(10, 10)
-        st.pyplot(fig1)
-
-    with col2:
-        st.subheader("Elevation & POIs")
-        st.markdown("Displays terrain elevation and important Points of Interest.")
-        fig2 = create_sunda_elevation_map()
-        fig2.set_size_inches(10, 10)
-        st.pyplot(fig2)
-
-    with col3:
-        st.subheader("Emergency Response Times")
-        st.markdown("Visualizes estimated emergency response times across the area.")
-        fig3 = create_sunda_response_map()
-        fig3.set_size_inches(10, 10)
-        st.pyplot(fig3)
-
-    # Sunda Hospital Information
-    st.markdown("---")
-    st.markdown("""
-    <h2 style='color: white; padding-bottom: 10px;'>
-        🏥 Hospital Information
-    </h2>
-        """, unsafe_allow_html=True)
-
-    # Read Sunda hospital data
-    with open(r'C:\Users\yanit\OneDrive\Bureau\Data Insights And Visualization\tsunami\sunda_hospital.geojson', 'r') as f:
-        hospitals_data = json.load(f)
-
-    # Create columns for each hospital
-    cols = st.columns(len(hospitals_data['features']))
-
-    for idx, hospital in enumerate(hospitals_data['features']):
-        with cols[idx]:
-            name = hospital['properties'].get('name', 'N/A')
-            address = f"{hospital['properties'].get('addr:housenumber', 'N/A')} {hospital['properties'].get('addr:street', 'N/A')}"
-            city_zip = f"{hospital['properties'].get('addr:city', 'N/A')}, {hospital['properties'].get('addr:postcode', 'N/A')}"
-            phone = hospital['properties'].get('phone', 'N/A')
-            website = hospital['properties'].get('website', '#')
-            beds = hospital['properties'].get('beds', 'N/A')
-            
-            facilities = []
-            if hospital['properties'].get('helipad') == 'yes':
-                facilities.append("🚁 Helipad Available")
-            if hospital['properties'].get('emergency') == 'yes':
-                facilities.append("🏥 Emergency Services")
-            if beds != 'N/A':
-                facilities.append(f"🛏️ Beds: {beds}")
-
-            st.subheader(name)
-            st.markdown("**Address**")
-            st.text(address)
-            st.text(city_zip)
-            st.markdown("**Contact**")
-            st.text(f"📞 {phone}")
-            st.markdown("**Facilities**")
-            if facilities:
-                for facility in facilities:
-                    st.text(facility)
-            else:
-                st.text("No facility information available")
-            st.markdown("**Website**")
-            st.markdown(f"[Visit Website]({website})")
-
-    # Disaster summary KPIs
+# Disaster summary KPIs
 st.markdown("---", unsafe_allow_html=True)
 st.markdown("""
     <style>
@@ -453,6 +319,113 @@ else:
 
 st.markdown("---")
 
+# Damage Assessment and Interactive Map
+if selected_disaster == "Joplin Tornado":
+    st.subheader("🌪️ Tornado Damage Assessment")
+    st.markdown("""
+    Interactive map showing the distribution and severity of tornado damage across Joplin.
+    Color coding: 🟢 No damage | 🔵 Minor damage | 🟡 Major damage | 🔴 Destroyed
+    """)
+
+    # Read and display the Joplin HTML file
+    with open(r'C:\Users\yanit\OneDrive\Bureau\Data Insights And Visualization\joplin_tornado_map.html', 'r', encoding='utf-8') as f:
+        html_data = f.read()
+    components.html(html_data, height=600)
+
+else:
+    st.subheader("🌊 Tsunami Damage Assessment")
+    st.markdown("""
+    Interactive map showing the distribution and severity of tsunami damage in the Sunda area.
+    Color coding: 🟢 No damage | 🔵 Minor damage | 🟡 Major damage | 🔴 Destroyed
+    """)
+
+    # Read and display the Sunda HTML file
+    with open(r'C:\Users\yanit\OneDrive\Bureau\Data Insights And Visualization\tsunami\sunda_tsunami_map.html', 'r', encoding='utf-8') as f:
+        html_data = f.read()
+    components.html(html_data, height=600)
+
+st.markdown("---")
+
+# Create three columns for the visualizations
+col1, col2, col3 = st.columns(3)
+
+if selected_disaster == "Joplin Tornado":
+    # Joplin visualizations
+    with col1:
+        st.subheader("Population Density")
+        st.markdown("Shows population distribution across Joplin, crucial for evacuation planning.")
+        fig1 = create_population_density_map()
+        fig1.set_size_inches(10, 16)
+        st.pyplot(fig1)
+
+    with col2:
+        st.subheader("Elevation & POIs")
+        st.markdown("Displays terrain elevation and important Points of Interest.")
+        fig2 = create_elevation_poi_map()
+        fig2.set_size_inches(10, 11)
+        st.pyplot(fig2)
+
+    with col3:
+        st.subheader("Emergency Response Times")
+        st.markdown("Visualizes estimated emergency response times across the city.")
+        fig3 = create_response_time_map()
+        fig3.set_size_inches(10, 11)
+        st.pyplot(fig3)
+
+else:
+    # Sunda visualizations
+    with col1:
+        st.subheader("Population Density")
+        st.markdown("Shows population distribution in the Sunda area, crucial for evacuation planning.")
+        fig1 = create_sunda_population_density_map()
+        fig1.set_size_inches(10, 10)
+        st.pyplot(fig1)
+
+    with col2:
+        st.subheader("Elevation & POIs")
+        st.markdown("Displays terrain elevation and important Points of Interest.")
+        fig2 = create_sunda_elevation_map()
+        fig2.set_size_inches(10, 10)
+        st.pyplot(fig2)
+
+    with col3:
+        st.subheader("Emergency Response Times")
+        st.markdown("Visualizes estimated emergency response times across the area.")
+        fig3 = create_sunda_response_map()
+        fig3.set_size_inches(10, 9)
+        st.pyplot(fig3)
+
+st.markdown("---")
+
+# Satellite Images
+if selected_disaster == "Joplin Tornado":
+    st.subheader("🛰️ Satellite Images")
+    st.markdown("Satellite images of the Joplin tornado damages.")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.image(r'C:\Users\yanit\OneDrive\Bureau\Data Insights And Visualization\joplin_ok.png', 
+                caption='First Image', use_column_width=True)
+    
+    with col2:
+        st.image(r'C:\Users\yanit\OneDrive\Bureau\Data Insights And Visualization\joplin_chaos.png', 
+                caption='Second Image', use_column_width=True)
+else:
+    st.subheader("🛰️ Satellite Images")
+    st.markdown("Satellite images of the Sunda tsunami damages.")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.image(r'C:\Users\yanit\OneDrive\Bureau\Data Insights And Visualization\tsunami\sunda_ok.png', 
+                caption='First Image', use_column_width=True)
+    
+    with col2:
+        st.image(r'C:\Users\yanit\OneDrive\Bureau\Data Insights And Visualization\tsunami\sunda_chaos.png', 
+                caption='Second Image', use_column_width=True)
+
+st.markdown("---")
+
+# Damage Type Breakdown
 if selected_disaster == "Joplin Tornado":
     st.subheader("📊 Damage Type Breakdown")
     st.markdown("This bar chart shows the distribution of damage types observed in the Joplin tornado.")
@@ -468,32 +441,96 @@ else:
     components.html(sunda_damage_plot, height=600)
 
 st.markdown("---")
+
+# Hospital Information
 if selected_disaster == "Joplin Tornado":
-    st.subheader("Satellite Images")
-    st.markdown("Satellite images of the Joplin tornado damages.")
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.image(r'C:\Users\yanit\OneDrive\Bureau\Data Insights And Visualization\joplin_ok.png', 
-                caption='First Image', use_column_width=True)
-    
-    with col2:
-        st.image(r'C:\Users\yanit\OneDrive\Bureau\Data Insights And Visualization\joplin_chaos.png', 
-                caption='Second Image', use_column_width=True)
-else : 
-    st.subheader("Satellite Images")
-    st.markdown("Satellite images of the Sunda tsunami damages.")
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.image(r'C:\Users\yanit\OneDrive\Bureau\Data Insights And Visualization\tsunami\sunda_ok.png', 
-                caption='First Image', use_column_width=True)
-    
-    with col2:
-        st.image(r'C:\Users\yanit\OneDrive\Bureau\Data Insights And Visualization\tsunami\sunda_chaos.png', 
-                caption='Second Image', use_column_width=True)
+    st.markdown("""
+    <h2 style='color: white; padding-bottom: 10px;'>
+        🏥 Hospital Information
+    </h2>
+        """, unsafe_allow_html=True)
 
+    # Read Joplin hospital data
+    with open(r'C:\Users\yanit\OneDrive\Bureau\AI_Disaster_Relief\app\responsetime\hospitals_joplin.geojson', 'r') as f:
+        hospitals_data = json.load(f)
 
+    # Create columns for each hospital
+    cols = st.columns(len(hospitals_data['features']))
 
+    for idx, hospital in enumerate(hospitals_data['features']):
+        with cols[idx]:
+            name = hospital['properties'].get('name', 'N/A')
+            address = f"{hospital['properties'].get('addr:housenumber', 'N/A')} {hospital['properties'].get('addr:street', 'N/A')}"
+            city_zip = f"{hospital['properties'].get('addr:city', 'N/A')}, {hospital['properties'].get('addr:postcode', 'N/A')}"
+            phone = hospital['properties'].get('phone', 'N/A')
+            website = hospital['properties'].get('website', '#')
+            beds = hospital['properties'].get('beds', 'N/A')
+            
+            facilities = []
+            if hospital['properties'].get('helipad') == 'yes':
+                facilities.append("🚁 Helipad Available")
+            if hospital['properties'].get('emergency') == 'yes':
+                facilities.append("🏥 Emergency Services")
+            if beds != 'N/A':
+                facilities.append(f"🛏️ Beds: {beds}")
 
+            st.subheader(name)
+            st.markdown("**Address**")
+            st.text(address)
+            st.text(city_zip)
+            st.markdown("**Contact**")
+            st.text(f"📞 {phone}")
+            st.markdown("**Facilities**")
+            if facilities:
+                for facility in facilities:
+                    st.text(facility)
+            else:
+                st.text("No facility information available")
+            st.markdown("**Website**")
+            st.markdown(f"[Visit Website]({website})")
 
+else:
+    st.markdown("""
+    <h2 style='color: white; padding-bottom: 10px;'>
+        🏥 Hospital Information
+    </h2>
+        """, unsafe_allow_html=True)
+
+    # Read Sunda hospital data
+    with open(r'C:\Users\yanit\OneDrive\Bureau\Data Insights And Visualization\tsunami\sunda_hospital.geojson', 'r') as f:
+        hospitals_data = json.load(f)
+
+    # Create columns for each hospital
+    cols = st.columns(len(hospitals_data['features']))
+
+    for idx, hospital in enumerate(hospitals_data['features']):
+        with cols[idx]:
+            name = hospital['properties'].get('name', 'N/A')
+            address = f"{hospital['properties'].get('addr:housenumber', 'N/A')} {hospital['properties'].get('addr:street', 'N/A')}"
+            city_zip = f"{hospital['properties'].get('addr:city', 'N/A')}, {hospital['properties'].get('addr:postcode', 'N/A')}"
+            phone = hospital['properties'].get('phone', 'N/A')
+            website = hospital['properties'].get('website', '#')
+            beds = hospital['properties'].get('beds', 'N/A')
+            
+            facilities = []
+            if hospital['properties'].get('helipad') == 'yes':
+                facilities.append("🚁 Helipad Available")
+            if hospital['properties'].get('emergency') == 'yes':
+                facilities.append("🏥 Emergency Services")
+            if beds != 'N/A':
+                facilities.append(f"🛏️ Beds: {beds}")
+
+            st.subheader(name)
+            st.markdown("**Address**")
+            st.text(address)
+            st.text(city_zip)
+            st.markdown("**Contact**")
+            st.text(f"📞 {phone}")
+            st.markdown("**Facilities**")
+            if facilities:
+                for facility in facilities:
+                    st.text(facility)
+            else:
+                st.text("No facility information available")
+            st.markdown("**Website**")
+            st.markdown(f"[Visit Website]({website})") 

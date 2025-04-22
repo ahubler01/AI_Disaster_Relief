@@ -23,7 +23,7 @@ def create_population_density_map():
     joplin_boundary_utm = joplin_boundary.to_crs('EPSG:32615')
 
     # Create visualization with a white background
-    fig, ax = plt.subplots(figsize=(15, 15), facecolor='white')
+    fig, ax = plt.subplots(figsize=(10, 11), facecolor='white')
     ax.set_facecolor('white')
 
     # Create custom colormap from white to dark red
