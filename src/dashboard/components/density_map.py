@@ -4,6 +4,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 import os
+from matplotlib.legend_handler import HandlerPatch
+from matplotlib.patches import Patch
+from matplotlib.collections import PatchCollection
+import matplotlib.cm as cm
+
+class HandlerPatchCollection(HandlerPatch):
+    def create_artists(self, legend, orig_handle,
+                      xdescent, ydescent, width, height, fontsize, trans):
+        p = Patch(facecolor=orig_handle.get_facecolor()[0],
+                 edgecolor=orig_handle.get_edgecolor()[0],
+                 linewidth=orig_handle.get_linewidth()[0])
+        self.update_prop(p, orig_handle, legend)
+        p.set_transform(trans)
+        return [p]
 
 def create_population_density_map(disaster="Joplin Tornado"):
     # Get the current working directory
