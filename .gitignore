@@ -1,6 +1,6 @@
 # Data directories
-data/raw/
-data/processed/
+data/raw/tier3/
+data/raw/train/
 
 # Python
 __pycache__/
@@ -36,16 +36,12 @@ ENV/
 *.swp
 *.swo
 
-# Jupyter Notebook
-.ipynb_checkpoints
-*.ipynb
-
 # Logs
 *.log
-
-# Model checkpoints
-checkpoints/
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Git LFS
+.gitattributes

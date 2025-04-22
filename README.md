@@ -9,9 +9,8 @@ AI_Disaster_Relief/
 ├── data/                    # Data directory
 │   ├── raw/                # Raw satellite imagery and labels
 │   │   ├── tier3/         # xView2 dataset
-│   │   │   ├── train/     # Training images and labels
-│   │   │   ├── test/      # Test images and labels
-│   │   │   └── val/       # Validation images and labels
+│   │   │   ├── images/     # Training images
+│   │   │   ├── labels/    # Training labels
 │   │   └── sample/        # Sample data for quick testing
 │   └── processed/          # Processed and preprocessed data
 ├── notebooks/              # Jupyter notebooks
@@ -36,9 +35,7 @@ This project uses the xView2 dataset, which is available at [xView2.org](https:/
 
 1. Visit [xView2.org](https://xview2.org/) and register to access the dataset
 2. Download the following components:
-   - Training data (tier3)
-   - Test data
-   - Validation data
+   - Training data (tier3) (~18GB)
 3. Organize the downloaded data in the following structure:
 
 ```
@@ -46,10 +43,7 @@ data/raw/tier3/
 ├── train/
 │   ├── images/           # Pre- and post-disaster images
 │   └── labels/          # JSON annotation files
-├── test/
-│   ├── images/
-│   └── labels/
-└── val/
+└──  test/
     ├── images/
     └── labels/
 ```
@@ -126,7 +120,7 @@ The model can be trained using the notebook in `notebooks/training/`. The traini
 
 - Optimizer: Adam
 - Learning Rate: 0.001
-- Batch Size: 32
+- Batch Size: 100
 - Loss Function: Cross Entropy Loss
 - Data Augmentation: Random horizontal flips, rotations, and color jittering
 
@@ -188,10 +182,10 @@ The distribution of damage classes in the dataset can be visualized in `output/d
 
 ## Sources and References
 
-Xview2 paper: https://arxiv.org/pdf/1911.09296
-Xview2 website: https://xview2.org/
-Kaggle notebook by Lezwon Castellino · 5y ago · 9,096 views https://www.kaggle.com/code/lezwon/xview2-challenge
-Kaggle notebook by BHUVAN N M · 1y ago · 830 views https://www.kaggle.com/code/bhuvannm/xbd-preprocessing
+- Xview2 paper: https://arxiv.org/pdf/1911.09296
+- Xview2 website: https://xview2.org/
+- Kaggle notebook by Lezwon Castellino · 5y ago · 9,096 views https://www.kaggle.com/code/lezwon/xview2-challenge
+- Kaggle notebook by BHUVAN N M · 1y ago · 830 views https://www.kaggle.com/code/bhuvannm/xbd-preprocessing
 
 ## Contributing
 
